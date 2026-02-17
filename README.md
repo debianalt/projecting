@@ -154,3 +154,5 @@ If you use these materials, please cite:
 Gomez, R. E. (2026). Projecting material extraction under the MERCOSUR-EU
 trade agreement.
 ```
+
+**Zenodo DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18674716.svg)](https://doi.org/10.5281/zenodo.18674716)
