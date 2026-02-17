@@ -138,9 +138,9 @@ All random seeds are fixed via `RANDOM_SEED = 42` in `config.py`. Results are fu
 
 ## References
 
-Lenzen, M., Geschke, A., Abd Rahman, M. D., et al. (2017). The Global MRIO Lab. *Economic Systems Research*, 29(2), 158-186.
+Lenzen, M., Geschke, A., Abd Rahman, M. D., et al. (2017). The Global MRIO Lab. *Economic Systems Research*, 29(2), 158-186. https://doi.org/10.1080/09535314.2017.1301887
 
-Lenzen, M., Geschke, A., West, J., et al. (2022). Implementing the material footprint to measure progress towards Sustainable Development Goals 8 and 12. *Nature Sustainability*, 5(2), 157-166.
+Lenzen, M., Geschke, A., West, J., et al. (2022). Implementing the material footprint to measure progress towards Sustainable Development Goals 8 and 12. *Nature Sustainability*, 5(2), 157-166. https://doi.org/10.1038/s41893-021-00811-6
 
 ## License
 
