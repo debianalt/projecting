@@ -4,7 +4,7 @@
 
 This repository contains replication materials and supplementary data for the article "Projecting material extraction under the MERCOSUR-EU trade agreement."
 
-**Author:** Raimundo Elias Gomez
+**Author:** Raimundo Elías Gómez
 **Affiliations:** CONICET / National University of Misiones (Argentina); Institute of Sociology, University of Porto (Portugal)
 **Contact:** rgomez@letras.up.pt
 **ORCID:** 0000-0002-4468-9618
@@ -47,7 +47,7 @@ The GLORIA MRIO database is available from the Industrial Ecology Virtual Labora
 
 ### 1. Tensor Construction (01_build_tensor.py)
 
-Extracts material extraction satellite accounts from GLORIA TQ for 31 countries (EU-27 + MERCOSUR-4) across 120 sectors, 367 material indicators, and 33 years (1990-2022). Material indicators are classified into 15 subcategories following EUROSTAT/UNEP-IRP conventions. Requires the full GLORIA database.
+Extracts material extraction data from GLORIA TQ satellite accounts (physical extension tables recording direct extraction in tonnes by sector, country, and year) for 31 countries (EU-27 + MERCOSUR-4) across 120 sectors, 367 material indicators, and 33 years (1990-2022). Material indicators are classified into 15 subcategories following EUROSTAT/UNEP-IRP conventions. Requires the full GLORIA database.
 
 ### 2. Non-negative Tensor Factorisation (02_ntf_analysis.py)
 
@@ -59,7 +59,7 @@ Generates choropleth maps of country loadings, temporal evolution by bloc, mater
 
 ### 4. Scenario Projections (04_scenario_projection.py)
 
-Projects material extraction under baseline and agreement scenarios (2022-2034) using trend extrapolation with trade agreement shocks calibrated from published tariff schedules (December 2024). Bootstrap confidence intervals (N=1000 replications, 90% CI). Agreement assumed to enter into force in 2027 with a 5-year linear phase-in.
+Projects material extraction under baseline and agreement scenarios (2022-2034) using quadratic trend extrapolation with trade agreement shocks calibrated from published tariff schedules (December 2024). Augmented Dickey-Fuller tests confirm trend-stationarity of all six temporal loading series (p < 0.05 for five components; p = 0.079 for C6 under constant+trend, p = 0.017 under constant-only). Bootstrap confidence intervals (N=1000 replications, 90% CI). Agreement assumed to enter into force in 2027 with a 5-year linear phase-in.
 
 ## Reproduction Instructions
 
@@ -151,7 +151,7 @@ Code: MIT. Data: subject to GLORIA MRIO terms of use.
 If you use these materials, please cite:
 
 ```
-Gomez, R. E. (2026). Projecting material extraction under the MERCOSUR-EU
+Gómez, R. E. (2026). Projecting material extraction under the MERCOSUR-EU
 trade agreement.
 ```
 
