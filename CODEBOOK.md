@@ -96,12 +96,12 @@ Components identified by the Non-negative Tensor Factorisation (K=6, R-squared=0
 
 | Component | Label | Dominant materials | Key countries |
 |-----------|-------|-------------------|---------------|
-| 0 | Agricultural crops | Cereals, sugar crops, vegetables | BRA, ARG, FRA, DEU |
-| 1 | Forestry & wood | Roundwood, wood fuel | BRA, SWE, FIN |
-| 2 | Fishery & aquatic | Marine fish, crustaceans | ESP, FRA, PRT |
-| 3 | Non-metallic minerals | Sand, gravel, limestone | DEU, FRA, ITA, ESP |
-| 4 | Livestock & grazing | Cattle, fodder crops, grazing | BRA, ARG, FRA |
-| 5 | Metal ores | Iron ore, copper, bauxite | BRA, SWE, FIN |
+| C1 | Agricultural crops | Cereals, sugar crops, vegetables | BRA, FRA, ARG |
+| C2 | Forestry & wood | Roundwood, wood fuel | BRA, SWE, DEU |
+| C3 | Fishery & aquatic | Marine fish, crustaceans | ARG, DNK, BRA |
+| C4 | Non-metallic minerals | Sand, gravel, limestone | BRA, ESP, DEU |
+| C5 | Livestock & grazing | Cattle, fodder crops, grazing | BRA, ARG, FRA |
+| C6 | Metal ores | Iron ore, copper, bauxite | BRA, FIN, ESP |
 
 ## Analysis Parameters
 

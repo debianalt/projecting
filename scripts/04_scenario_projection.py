@@ -37,7 +37,7 @@ np.random.seed(RANDOM_SEED)
 print("[1/7] Loading data...")
 
 loadings = xr.open_dataset(DATA_DIR / "ntf_loadings.nc")
-ds = xr.open_dataset(DATA_DIR / "tensor_materials.nc")
+# ds = xr.open_dataset(DATA_DIR / "tensor_materials.nc")  # not used by projection
 
 K = loadings.attrs["optimal_K"]
 years = list(loadings.coords["year"].values)
@@ -290,35 +290,54 @@ print("\n=== Projected changes by bloc and MFA category ===")
 print(pivot[["bloc", "mfa_category", "change_baseline_%", "change_agreement_%",
              "agreement_effect_%"]].to_string(index=False))
 
-# Plot
-fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+# Plot — indexed extraction (Observed 2022 = 100), single panel, greyscale
+# Hatch distinguishes bloc; grey tone distinguishes scenario
+plt.rcParams.update({"hatch.linewidth": 0.8})
 
-for bi, (bloc_name, ax) in enumerate(zip(["MERCOSUR", "EU27"], axes)):
-    bloc_pivot = pivot[pivot["bloc"] == bloc_name].set_index("mfa_category")
-    bloc_pivot = bloc_pivot.reindex(MFA_ORDER)
+fig, ax = plt.subplots(figsize=(10, 6))
 
-    x = np.arange(len(MFA_ORDER))
-    width = 0.35
+obs_col = f"Observed {last_obs_year}"
+bas_col = f"Baseline {last_proj_year}"
+agr_col = f"Agreement {last_proj_year}"
 
-    bars1 = ax.bar(x - width/2, bloc_pivot["change_baseline_%"], width,
-                   color=[MFA_COLORS[c] for c in MFA_ORDER], alpha=0.4,
-                   edgecolor="gray", label="Baseline trend")
-    bars2 = ax.bar(x + width/2, bloc_pivot["change_agreement_%"], width,
-                   color=[MFA_COLORS[c] for c in MFA_ORDER], alpha=0.9,
-                   edgecolor="black", label="With agreement")
+# Build indexed values per bloc
+bar_data = []  # list of (label, values_array, fill, hatch)
+for bloc_name, hatch_pat in [("MERCOSUR", "///"), ("EU27", "xxx")]:
+    bp = pivot[pivot["bloc"] == bloc_name].set_index("mfa_category").reindex(MFA_ORDER)
+    obs_vals = bp[obs_col].values
+    idx_bas = bp[bas_col].values / obs_vals * 100
+    idx_agr = bp[agr_col].values / obs_vals * 100
+    bar_data.append((f"{bloc_name} Baseline ({last_proj_year})", idx_bas, "#CCCCCC", hatch_pat))
+    bar_data.append((f"{bloc_name} Agreement ({last_proj_year})", idx_agr, "#444444", hatch_pat))
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(MFA_ORDER, fontsize=9, rotation=20)
-    ax.set_ylabel(f"Change from {last_obs_year} (%)")
-    ax.set_title(bloc_name, fontsize=12, fontweight="bold")
-    ax.axhline(0, color="black", linewidth=0.5)
-    ax.grid(True, alpha=0.2, axis="y")
-    if bi == 0:
-        ax.legend(frameon=False, fontsize=9)
+x = np.arange(len(MFA_ORDER))
+n_bars = len(bar_data)
+width = 0.18
+offsets = [(i - (n_bars - 1) / 2) * width for i in range(n_bars)]
 
-plt.suptitle(f"Projected material extraction change {last_obs_year}\u2192{last_proj_year}:\n"
-             "Baseline trend vs. trade agreement scenario",
-             fontsize=12, fontweight="bold")
+for (label, vals, fill, hatch), off in zip(bar_data, offsets):
+    bars = ax.bar(x + off, vals, width, color=fill, edgecolor="black",
+                  hatch=hatch, linewidth=1.0, label=label)
+    for bar in bars:
+        bar.set_edgecolor("black")
+        bar.set_linewidth(1.0)
+
+# Reference line at 100 (Observed 2022)
+ax.axhline(100, color="black", linestyle="--", linewidth=1.0,
+           label=f"Observed ({last_obs_year})")
+
+ax.set_xticks(x)
+ax.set_xticklabels(MFA_ORDER, fontsize=10, rotation=20, ha="right")
+ax.set_ylabel(f"Extraction index (Observed {last_obs_year} = 100)", fontsize=11)
+ax.grid(True, alpha=0.15, axis="y")
+ax.spines["top"].set_visible(False)
+ax.spines["right"].set_visible(False)
+ax.legend(frameon=True, facecolor="white", edgecolor="grey",
+          fontsize=9, loc="upper left")
+
+plt.suptitle(f"Projected material extraction {last_obs_year}\u2013{last_proj_year}:\n"
+             f"indexed to observed levels ({last_obs_year} = 100)",
+             fontsize=13, fontweight="bold")
 plt.tight_layout()
 plt.savefig(FIG_DIR / "fig09_material_impact.png", dpi=300, bbox_inches="tight")
 plt.close()
