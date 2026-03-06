@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains replication materials and supplementary data for the article "Projecting material extraction under the MERCOSUR-EU trade agreement."
+This repository contains replication materials and supplementary data for the research "Projecting material extraction under the MERCOSUR-EU trade agreement."
 
 **Author:** Raimundo Elías Gómez
 **Affiliations:** CONICET / National University of Misiones (Argentina); Institute of Sociology, University of Porto (Portugal)
