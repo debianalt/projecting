@@ -1,8 +1,8 @@
-# Replication Materials: Projecting Material Extraction under the MERCOSUR-EU Trade Agreement
+# Replication Materials: Multi-dimensional Decomposition of Material Extraction Patterns
 
 ## Overview
 
-This repository contains replication materials and supplementary data for the research "Projecting material extraction under the MERCOSUR-EU trade agreement."
+This repository contains replication materials and supplementary data for the article "Multi-dimensional decomposition of material extraction patterns: Projecting the MERCOSUR-EU trade agreement."
 
 **Author:** Raimundo Elías Gómez
 **Affiliations:** CONICET / National University of Misiones (Argentina); Institute of Sociology, University of Porto (Portugal)
@@ -113,16 +113,16 @@ python 04_scenario_projection.py
 
 | Article Figure | File | Description |
 |----------------|------|-------------|
-| Figure 1 | `fig01_pipeline.png` | Analytical pipeline flowchart |
-| Figure 2 | `fig07_historical_trends.png` | Material extraction by MFA category (1990-2022) |
-| Figure 3 | `fig01_rank_selection.png` | NTF rank selection: R-squared and marginal gain |
-| Figure 4 | `fig05_material_heatmap.png` | Material subcategory loadings on NTF components |
-| Figure 5 | `fig03_choropleth_loadings.png` | Choropleth maps of country loadings (6 components) |
-| Figure 6 | `fig04_temporal_blocs.png` | Temporal evolution of components by bloc |
-| Figure 7 | `fig08_projection_scenarios.png` | Projected temporal loadings: baseline vs agreement (90% CI) |
-| Figure 8 | `fig09_material_impact.png` | Projected change by MFA category and bloc |
-| **Fig. S1** | `fig02_component_loadings.png` | **Supplementary:** Full component loadings (all dimensions) |
-| **Fig. S2** | `fig06_sector_comparison.png` | **Supplementary:** Sector loadings weighted by bloc |
+| Fig. 1 | `fig01_pipeline.png` | Analytical pipeline flowchart |
+| Fig. 2 | `fig02_historical_trends.png` | Material extraction by MFA category (1990–2022) |
+| Fig. 3 | `fig03_material_heatmap.png` | Material subcategory loadings on NTF components |
+| Fig. 4 | `fig04_choropleth_loadings.png` | Choropleth maps of country loadings (6 components) |
+| Fig. 5 | `fig05_projection_scenarios.png` | Projected temporal loadings: baseline vs agreement (90% CI) |
+| Fig. 6 | `fig06_material_impact.png` | Projected change by MFA category |
+| Fig. S1 | `fig_s1_component_loadings.png` | Full component loadings (all dimensions) |
+| Fig. S2 | `fig_s2_sector_comparison.png` | Sector loadings weighted by bloc |
+| Fig. S3 | `fig_s3_rank_selection.png` | NTF rank selection: R-squared and marginal gain |
+| Fig. S4 | `fig_s4_temporal_blocs.png` | Temporal evolution of components by bloc |
 
 ## Key Results
 
@@ -151,8 +151,8 @@ Code: MIT. Data: subject to GLORIA MRIO terms of use.
 If you use these materials, please cite:
 
 ```
-Gómez, R. E. (2026). Projecting material extraction under the MERCOSUR-EU
-trade agreement.
+Gómez, R. E. (2026). Multi-dimensional decomposition of material extraction
+patterns: Projecting the MERCOSUR-EU trade agreement.
 ```
 
 **Zenodo DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18674716.svg)](https://doi.org/10.5281/zenodo.18674716)

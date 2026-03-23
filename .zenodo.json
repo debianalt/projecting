@@ -1,5 +1,5 @@
 {
-    "title": "Projecting Material Extraction under the MERCOSUR-EU Trade Agreement \u2014 Replication Materials",
+    "title": "Multi-dimensional Decomposition of Material Extraction Patterns: Projecting the MERCOSUR-EU Trade Agreement \u2014 Replication Materials",
     "creators": [
         {
             "name": "G\u00f3mez, Raimundo El\u00edas",
@@ -7,15 +7,14 @@
             "affiliation": "National Scientific and Technical Research Council (CONICET), Argentina; Institute of Sociology, University of Porto, Portugal"
         }
     ],
-    "description": "Replication materials (data, analysis scripts, and figures) for the article 'Projecting material extraction under the MERCOSUR-EU trade agreement'. Includes Non-negative Tensor Factorisation (NTF) of material extraction patterns from the GLORIA MRIO database (Loop060) for 31 countries (EU-27 and MERCOSUR-4), scenario projections under the trade agreement, and all publication figures.",
+    "description": "Replication materials (data, analysis scripts, and figures) for the article 'Multi-dimensional decomposition of material extraction patterns: Projecting the MERCOSUR-EU trade agreement'. Includes Non-negative Tensor Factorisation (NTF) of material extraction patterns from the GLORIA MRIO database (Loop060) for 31 countries (EU-27 and MERCOSUR-4), scenario projections under the trade agreement, and all publication figures.",
     "keywords": [
-        "material extraction",
-        "MRIO",
-        "non-negative tensor factorisation",
-        "MERCOSUR-EU trade agreement",
-        "critical minerals",
-        "resource policy",
-        "scenario analysis"
+        "material flow analysis",
+        "multi-regional input-output",
+        "tensor decomposition",
+        "material footprint",
+        "trade agreement",
+        "industrial metabolism"
     ],
     "license": "MIT",
     "upload_type": "software",
