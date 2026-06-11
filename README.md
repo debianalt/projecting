@@ -164,4 +164,4 @@ Gómez, R. E. (2026). Multi-dimensional decomposition of material extraction
 patterns: A stylised scenario analysis of the MERCOSUR-EU trade agreement.
 ```
 
-**Zenodo DOI:** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18674716.svg)](https://doi.org/10.5281/zenodo.18674716)
+**Zenodo concept DOI (latest version):** [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18674715.svg)](https://doi.org/10.5281/zenodo.18674715)
