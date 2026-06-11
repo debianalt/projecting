@@ -4,7 +4,7 @@
         {
             "name": "G\u00f3mez, Raimundo El\u00edas",
             "orcid": "0000-0002-4468-9618",
-            "affiliation": "National Scientific and Technical Research Council (CONICET), Argentina; Institute of Sociology, University of Porto, Portugal"
+            "affiliation": "National Scientific and Technical Research Council (CONICET), Faculty of Humanities and Social Sciences, National University of Misiones, Argentina"
         }
     ],
     "description": "Replication materials (data, analysis scripts, and figures) for the article 'Multi-dimensional decomposition of material extraction patterns: A stylised scenario analysis of the MERCOSUR-EU trade agreement'. Includes Non-negative Tensor Factorisation (NTF) of territorial material extraction from the GLORIA MRIO database (Loop060) for 31 countries (EU-27 and MERCOSUR-4), and a stylised scenario sensitivity analysis of the trade agreement in which the temporal loadings are perturbed by illustrative, tariff-schedule-informed shocks (the magnitudes are conditional on the assumptions; the ordering of affected material categories is robust). All publication figures are included.",

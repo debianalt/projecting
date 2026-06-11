@@ -5,8 +5,8 @@
 This repository contains replication materials and supplementary data for the article "Multi-dimensional decomposition of material extraction patterns: A stylised scenario analysis of the MERCOSUR-EU trade agreement."
 
 **Author:** Raimundo Elías Gómez
-**Affiliations:** CONICET / National University of Misiones (Argentina); Institute of Sociology, University of Porto (Portugal)
-**Contact:** rgomez@letras.up.pt
+**Affiliation:** CONICET / Faculty of Humanities and Social Sciences, National University of Misiones (Argentina)
+**Contact:** elias.gomez@conicet.gov.ar
 **ORCID:** 0000-0002-4468-9618
 
 ## Repository Structure
