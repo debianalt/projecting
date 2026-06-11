@@ -1,5 +1,5 @@
 {
-    "title": "Multi-dimensional Decomposition of Material Extraction Patterns: Projecting the MERCOSUR-EU Trade Agreement \u2014 Replication Materials",
+    "title": "Multi-dimensional Decomposition of Material Extraction Patterns: A Stylised Scenario Analysis of the MERCOSUR-EU Trade Agreement \u2014 Replication Materials",
     "creators": [
         {
             "name": "G\u00f3mez, Raimundo El\u00edas",
@@ -7,14 +7,14 @@
             "affiliation": "National Scientific and Technical Research Council (CONICET), Argentina; Institute of Sociology, University of Porto, Portugal"
         }
     ],
-    "description": "Replication materials (data, analysis scripts, and figures) for the article 'Multi-dimensional decomposition of material extraction patterns: Projecting the MERCOSUR-EU trade agreement'. Includes Non-negative Tensor Factorisation (NTF) of material extraction patterns from the GLORIA MRIO database (Loop060) for 31 countries (EU-27 and MERCOSUR-4), scenario projections under the trade agreement, and all publication figures.",
+    "description": "Replication materials (data, analysis scripts, and figures) for the article 'Multi-dimensional decomposition of material extraction patterns: A stylised scenario analysis of the MERCOSUR-EU trade agreement'. Includes Non-negative Tensor Factorisation (NTF) of territorial material extraction from the GLORIA MRIO database (Loop060) for 31 countries (EU-27 and MERCOSUR-4), and a stylised scenario sensitivity analysis of the trade agreement in which the temporal loadings are perturbed by illustrative, tariff-schedule-informed shocks (the magnitudes are conditional on the assumptions; the ordering of affected material categories is robust). All publication figures are included.",
     "keywords": [
         "material flow analysis",
         "multi-regional input-output",
         "tensor decomposition",
-        "material footprint",
+        "territorial extraction",
         "trade agreement",
-        "industrial metabolism"
+        "scenario analysis"
     ],
     "license": "MIT",
     "upload_type": "software",
