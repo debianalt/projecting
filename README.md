@@ -27,7 +27,9 @@ projecting/
 │   ├── 02_ntf_analysis.py              # Non-negative tensor factorisation (rank selection + K=6)
 │   ├── 03_geospatial_viz.py            # Choropleth maps, temporal trends, heatmaps
 │   ├── 04_scenario_projection.py       # Baseline/agreement scenario paths + trend bootstrap
-│   └── 05_sensitivity_analysis.py      # Shock-magnitude/phase-in sensitivity envelope (Fig 7)
+│   ├── 05_sensitivity_analysis.py      # Shock-magnitude/phase-in sensitivity envelope (Fig 7)
+│   ├── 07_regenerate_all_figures.py    # Publication figures 2-7 + S1-S4 (600 dpi, no in-figure titles)
+│   └── 08_regenerate_pipeline.py       # Pipeline schematic (Fig 1, 600 dpi)
 ├── figures/                 # All figures (article + supplementary)
 ├── CODEBOOK.md              # Variable and file definitions
 ├── requirements.txt         # Python dependencies
@@ -97,7 +99,13 @@ python 04_scenario_projection.py
 
 # 5. Sensitivity envelope (~1 min; uses ntf_loadings.nc only)
 python 05_sensitivity_analysis.py
+
+# 6. Publication figures (600 dpi, no in-figure titles; uses intermediate data only)
+python 07_regenerate_all_figures.py
+python 08_regenerate_pipeline.py
 ```
+
+All publication figures are produced as RGB PNGs at 600 dpi with sans-serif lettering and no titles inside the illustrations, following the Journal of Industrial Ecology artwork guidelines (titles are carried in the figure captions).
 
 **Partial replication (without GLORIA):** Scripts 02-04 can be run using the intermediate data files included in `data/`. Only `01_build_tensor.py` requires the full GLORIA database. To replicate from step 02 onwards, ensure `data/tensor_summary.parquet` and `data/material_classification.parquet` are present, then run scripts 02-04 in order.
 
