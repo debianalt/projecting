@@ -128,20 +128,20 @@ a_med, a_lo, a_hi = np.median(pa, 0), np.percentile(pa, 5, 0), np.percentile(pa,
 fig, axes = plt.subplots(2, 3, figsize=(20, 11)); axf = axes.flatten()
 for k in range(K):
     ax = axf[k]
-    ax.plot(years, yl[:, k], "k-", lw=2.5, label="Observed")
-    ax.plot(proj_years, b_med[:, k], "--", color="#7f8c8d", lw=2.2, label="Baseline (no agreement)")
+    ax.plot(years, yl[:, k], "k-", lw=3.0, label="Observed")
+    ax.plot(proj_years, b_med[:, k], "--", color="#7f8c8d", lw=2.6, label="Baseline (no agreement)")
     ax.fill_between(proj_years, b_lo[:, k], b_hi[:, k], color="#7f8c8d", alpha=0.18)
-    ax.plot(proj_years, a_med[:, k], "-", color="#e74c3c", lw=2.8, label="Agreement scenario")
+    ax.plot(proj_years, a_med[:, k], "-", color="#e74c3c", lw=3.4, label="Agreement scenario")
     ax.fill_between(proj_years, a_lo[:, k], a_hi[:, k], color="#e74c3c", alpha=0.18)
-    ax.axvline(AGREEMENT_YEAR, color="#2c3e50", lw=1.2, ls=":", alpha=0.7)
-    ax.annotate("Agreement\nenters force", xy=(AGREEMENT_YEAR, ax.get_ylim()[1] * 0.93),
-                fontsize=12, ha="center", color="#2c3e50", fontweight="bold")
+    ax.axvline(AGREEMENT_YEAR, color="#2c3e50", lw=1.4, ls=":", alpha=0.7)
+    ax.annotate("Agreement\nenters force", xy=(AGREEMENT_YEAR, ax.get_ylim()[1] * 0.92),
+                fontsize=15, ha="center", color="#2c3e50", fontweight="bold")
     ax.set_title(f"C{k+1}: {clabel[f'C{k+1}']}", fontsize=18, fontweight="bold")
-    ax.tick_params(labelsize=14); ax.grid(True, alpha=0.2)
+    ax.tick_params(labelsize=17); ax.grid(True, alpha=0.2)
     if k >= 3:
         ax.set_xlabel("Year", fontsize=16)
     if k == 0:
-        ax.legend(fontsize=14, frameon=True, framealpha=0.9, loc="upper left")
+        ax.legend(fontsize=16, frameon=True, framealpha=0.9, loc="upper left")
 plt.suptitle("Projected NTF temporal loadings: baseline vs. agreement scenario\n"
              "(shaded bands: 90% trend-only bootstrap CI, n=1,000 - not agreement-effect uncertainty)",
              fontsize=20, fontweight="bold")
