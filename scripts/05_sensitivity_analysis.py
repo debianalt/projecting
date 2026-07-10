@@ -1,152 +1,131 @@
 """
-05_sensitivity_analysis.py — Stylised scenario sensitivity analysis
-===================================================================
-Maps the sensitivity of the trade-agreement scenario effect to the assumed
-shock magnitude and phase-in length, addressing the conditional nature of
-the projection: the scenario shocks are illustrative parameters, not
-estimated trade-policy responses, so the magnitude of any effect is by
-construction proportional to the assumed shock.
+05_sensitivity_analysis.py — Stylised sensitivity analysis (JIE round-2 revision)
+=================================================================================
+Prints the tables underlying Section 4.5 and the Supplementary Information,
+using the corrected scenario engine in scenario.py.
 
-The script sweeps the full shock vector over scale factors 0.5-1.5 and the
-phase-in window over 3-10 years (20 combinations), reports the resulting
-envelope of the MFA-category effect, checks ordinal robustness, and produces
-fig07_sensitivity.png. It also prints a comparison of the NTF components
-against a naive reading of the material classification.
+Round-2 reviewer comments addressed here:
+  1. Effects are computed in TONNES space (tonnes-proportional shock,
+     back-transformed) instead of as a ratio of log-space indices.
+  2. Ordinal robustness is tested by varying the component shocks INDEPENDENTLY
+     (anchored and unanchored), not by a common multiplier on the whole vector.
+  3. A specialisation measure is defined explicitly and evaluated baseline vs
+     scenario, distinguishing the within-bloc compositional shift (which moves)
+     from the between-bloc asymmetry (invariant to a common boost by construction).
 
-Inputs:  data/ntf_loadings.nc
-Outputs: figures/fig07_sensitivity.png
-         printed sensitivity envelope and NTF-vs-classification tables
+Retained from round 1: NTF-vs-naive-MFA-subcategory comparison and the
+uniformly-screened rank diagnostics.
 
-Runs from the intermediate data alone; the full GLORIA tensor is not needed.
+Inputs:  data/ntf_loadings.nc, data/ntf_diagnostics.parquet, data/tensor_summary.parquet
+Outputs: printed tables only. Figures 5-7 are produced by 07_regenerate_all_figures.py.
 """
-
 import numpy as np
 import pandas as pd
-import xarray as xr
-import matplotlib.pyplot as plt
+import scenario as S
 
-from config import (
-    DATA_DIR, FIG_DIR, COMP_LABELS, AGREEMENT_SHOCKS, PHASE_IN_YEARS,
-    AGREEMENT_YEAR, PROJECTION_END, YEAR_RANGE,
-)
+ntf = S.load_ntf()
+base_load, eff_load, proj_years, trend = S.baseline_loadings(ntf)
+cd = S.central_delta(ntf)
+mbk = np.array([S.SHOCKS[k][0] for k in range(ntf.K)])
+ebk = np.array([S.SHOCKS[k][1] for k in range(ntf.K)])
+EFFECT_YEAR = proj_years[-1]
 
-MFA_ORDER = ["Biomass", "Metal ores", "Non-metallic minerals"]
+print(f"NTF: K={ntf.K}, R2={ntf.R2:.3f}; effect year = {EFFECT_YEAR}")
+print("Central per-component tonnes shock (C1..C6):", np.round(cd, 4))
 
-loadings = xr.open_dataset(DATA_DIR / "ntf_loadings.nc")
-K = int(loadings.attrs["optimal_K"])
-years = list(loadings.coords["year"].values)
-blocs = list(loadings.coords["bloc"].values)
-yl = loadings["year_loading"].values
-cl = loadings["country_loading"].values
-sl = loadings["sector_loading"].values
-ml = loadings["material_loading"].values
-mat_subcats = list(loadings.coords["material_subcat"].values)
-mfa_cats = list(loadings.coords["mfa_category"].values)
-sectors = list(loadings.coords["sector"].values)
-countries = list(loadings.coords["country"].values)
-
-proj_years = list(range(YEAR_RANGE[1] + 1, PROJECTION_END))
-n_hist, n_proj = len(years), len(proj_years)
-t = np.arange(n_hist)
-tp = np.arange(n_hist, n_hist + n_proj)
-trend = {k: np.polyfit(t, yl[:, k], 2) for k in range(K)}
-base_load = np.array([np.polyval(trend[k], tp) for k in range(K)]).T
-
-merc = np.array([b == "MERCOSUR" for b in blocs])
-eu = np.array([b == "EU27" for b in blocs])
-
-
-def avg_boost(k, scale=1.0, equal=False):
-    if equal:
-        mb, eb = 0.08, 0.05
-    else:
-        mb = AGREEMENT_SHOCKS[k]["mercosur_export_boost"]
-        eb = AGREEMENT_SHOCKS[k]["eu_export_boost"]
-    mb *= scale
-    eb *= scale
-    mw, ew = cl[merc, k].sum(), cl[eu, k].sum()
-    tw = mw + ew
-    return (mb * mw + eb * ew) / tw if tw > 0 else 0.0
-
-
-def mfa_effects(scale=1.0, phase=PHASE_IN_YEARS, equal=False):
-    ph = np.clip((np.array(proj_years) - AGREEMENT_YEAR) / phase, 0, 1)
-    agl = base_load.copy()
-    for k in range(K):
-        agl[:, k] = base_load[:, k] * (1 + avg_boost(k, scale, equal) * ph)
-    by, ay = base_load[-1, :], agl[-1, :]
-    cb, ca = {}, {}
-    for mi, cat in enumerate(mfa_cats):
-        b = sum(cl[:, k].sum() * sl[:, k].sum() * ml[mi, k] * by[k] for k in range(K))
-        a = sum(cl[:, k].sum() * sl[:, k].sum() * ml[mi, k] * ay[k] for k in range(K))
-        cb[cat] = cb.get(cat, 0) + b
-        ca[cat] = ca.get(cat, 0) + a
-    return {c: (ca[c] - cb[c]) / cb[c] * 100 for c in cb if cb[c] > 0}
-
-
-scales = [0.5, 0.75, 1.0, 1.25, 1.5]
-phases = [3, 5, 7, 10]
-central = mfa_effects()
-print("Central scenario effect (scale=1, phase=5):")
-for c in MFA_ORDER:
+# --- Reviewer 1: category effects in TONNES space (central scenario) ---
+central = S.tonnes_effect(ntf, eff_load, cd)
+print("\n=== Central-scenario MFA-category effect at 2034 (tonnes space) ===")
+for c in S.MFA3:
     print(f"  {c:24s} {central[c]:+.2f}%")
+print("  (round-1 log-space index reported +8.5/+5.8/+2.0; the tonnes-proportional")
+print("   operator now yields genuine tonnage percentages)")
 
-env = {c: [] for c in MFA_ORDER}
-ordering_ok = 0
-for s in scales:
-    for ph in phases:
-        e = mfa_effects(s, ph)
-        for c in MFA_ORDER:
-            env[c].append(e[c])
-        if e["Biomass"] > e["Metal ores"] > e["Non-metallic minerals"]:
-            ordering_ok += 1
-print(f"\nEnvelope across {len(scales)*len(phases)} combinations:")
-for c in MFA_ORDER:
-    print(f"  {c:24s} {min(env[c]):+.2f}% to {max(env[c]):+.2f}%")
-print(f"Ordinal ranking biomass>metal>non-metallic preserved in "
-      f"{ordering_ok}/{len(scales)*len(phases)} combinations")
+# --- Reviewer 2: ordinal robustness under INDEPENDENT shock variation ---
+print("\n=== Ordinal robustness: independent component shocks (n=2000) ===")
+for mode in ("anchored", "unanchored"):
+    r = S.independent_mc(ntf, eff_load, n=2000, mode=mode)
+    tag = {"anchored": "tariff-anchored +/-60%",
+           "unanchored": "unanchored U(0,0.15)"}[mode]
+    print(f"  {tag:24s}  ordering held {r['ordering_pct']:.1f}%  "
+          f"biomass leads {r['biomass_leads_pct']:.1f}%")
 
-eq = mfa_effects(equal=True)
-print("\nEqual-shock alternative (isolates the assumed ordering):")
-for c in MFA_ORDER:
-    print(f"  {c:24s} {eq[c]:+.2f}%")
+# per-category effect distribution across anchored draws (Table S7 ranges)
+rng = np.random.default_rng(12345)
+dist = {c: [] for c in S.MFA3}
+for _ in range(2000):
+    d = np.clip(cd * (1 + rng.uniform(-0.6, 0.6, ntf.K)), 0.0, None)
+    e = S.tonnes_effect(ntf, eff_load, d)
+    for c in S.MFA3:
+        dist[c].append(e[c])
+print("\n=== Effect distribution over anchored draws (central | 5th-95th | min-max) ===")
+for c in S.MFA3:
+    v = np.array(dist[c])
+    print(f"  {c:24s} {central[c]:+.2f}% | {np.percentile(v,5):+.1f} to "
+          f"{np.percentile(v,95):+.1f} | {v.min():+.1f} to {v.max():+.1f}")
 
-# Figure 7 — sensitivity envelope
-fig, ax = plt.subplots(figsize=(8, 5))
-x = np.arange(len(MFA_ORDER))
-lows = [min(env[c]) for c in MFA_ORDER]
-highs = [max(env[c]) for c in MFA_ORDER]
-cents = [central[c] for c in MFA_ORDER]
-for i in range(len(MFA_ORDER)):
-    ax.plot([x[i], x[i]], [lows[i], highs[i]], color="#555555", lw=2, zorder=1)
-    ax.plot([x[i] - 0.08, x[i] + 0.08], [lows[i], lows[i]], color="#555555", lw=2)
-    ax.plot([x[i] - 0.08, x[i] + 0.08], [highs[i], highs[i]], color="#555555", lw=2)
-ax.scatter(x, cents, s=90, color="#c0392b", zorder=3, label="Central illustrative scenario")
-for i in range(len(MFA_ORDER)):
-    ax.annotate(f"{cents[i]:+.1f}%", (x[i], cents[i]), textcoords="offset points",
-                xytext=(10, 0), fontsize=9, color="#c0392b", va="center")
-    ax.annotate(f"{highs[i]:+.1f}", (x[i], highs[i]), textcoords="offset points",
-                xytext=(0, 6), fontsize=8, color="#555555", ha="center")
-    ax.annotate(f"{lows[i]:+.1f}", (x[i], lows[i]), textcoords="offset points",
-                xytext=(0, -14), fontsize=8, color="#555555", ha="center")
-ax.axhline(0, color="black", lw=0.8)
-ax.set_xticks(x)
-ax.set_xticklabels(MFA_ORDER, fontsize=10)
-ax.set_ylabel("Scenario effect at 2034 vs. baseline trend (%)", fontsize=10)
-ax.set_title("Sensitivity of the MFA-category scenario effect to assumed shock magnitude\n"
-             "(range: shock scale 0.5-1.5 x phase-in 3-10 years)", fontsize=10.5)
-ax.legend(frameon=False, fontsize=9, loc="upper right")
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.grid(True, axis="y", alpha=0.2)
-plt.tight_layout()
-plt.savefig(FIG_DIR / "fig07_sensitivity.png", dpi=300, bbox_inches="tight")
-plt.close()
-print(f"\nSaved: {FIG_DIR / 'fig07_sensitivity.png'}")
+# --- Reviewer 3: specialisation, observed tonnes, baseline vs scenario ---
+print("\n=== Specialisation (observed 2022 extraction shares) ===")
+# Uniform (headline) scenario: within-bloc composition shifts; between-bloc invariant.
+actual, ry = S.actual_bloc_category_tonnes()
+cats = S.MFA3 + ["Fossil fuels"]
+uboost = {c: central.get(c, 0.0) for c in cats}
+uboost["Fossil fuels"] = 0.0
+print(f"  Reference year: {ry}")
+print("  -- headline uniform scenario (within-bloc category shares) --")
+for bl in ("MERCOSUR", "EU27"):
+    b0 = {c: actual[(bl, c)] for c in cats}
+    t0 = sum(b0.values())
+    b1 = {c: actual[(bl, c)] * (1 + uboost[c] / 100) for c in cats}
+    t1 = sum(b1.values())
+    print(f"     {bl:8s} biomass {b0['Biomass']/t0*100:5.2f}->{b1['Biomass']/t1*100:5.2f}%"
+          f"  metal {b0['Metal ores']/t0*100:5.2f}->{b1['Metal ores']/t1*100:5.2f}%"
+          f"  non-met {b0['Non-metallic minerals']/t0*100:5.2f}->{b1['Non-metallic minerals']/t1*100:5.2f}%")
+print("  (between-bloc shares are invariant to a common proportional boost)")
 
-# NTF vs material classification (near-diagonal check)
-print("\nNTF material-subcategory loadings (peak component per subcategory):")
-for mi, sc in enumerate(mat_subcats):
-    k = int(np.argmax(ml[mi]))
-    print(f"  {sc:22s} peak C{k+1} ({ml[mi, k]:.3f})"
-          + ("  [near-zero: not represented]" if ml[mi].max() < 1e-3 else ""))
+# Bloc-specific variant (Table S9): between-bloc asymmetry moves.
+sp = S.specialisation(ntf, eff_load, bloc_specific=(mbk, ebk))
+print("  -- bloc-specific variant (Table S9): MERCOSUR indices --")
+for c in S.MFA3:
+    b = sp["baseline"][("MERCOSUR", c)]
+    a = sp["agreement"][("MERCOSUR", c)]
+    print(f"     {c:22s} within {b['within']:5.2f}->{a['within']:5.2f}%  "
+          f"between {b['between']:5.2f}->{a['between']:5.2f}%  RCA {b['rca']:.3f}->{a['rca']:.3f}")
+cbe = S.category_boost_by_bloc(ntf, eff_load, (mbk, ebk))
+print("     per-bloc category effect: MERC",
+      {c: round(cbe['MERCOSUR'][c], 1) for c in S.MFA3},
+      "| EU", {c: round(cbe['EU27'][c], 1) for c in S.MFA3})
+
+# --- Table S5: sector-level effect (loading-weighted, tonnes) ---
+print("\n=== Table S5: sector-level tonnes effect (top 20) ===")
+se = S.sector_effects(ntf, cd)
+order = np.argsort(se)[::-1][:20]
+for rank, i in enumerate(order, 1):
+    print(f"  {rank:2d}. {se[i]:+6.2f}%  {ntf.sectors[i]}")
+
+# --- Retained: NTF vs naive MFA-subcategory (reviewer comment 4, round 1) ---
+print("\n=== NTF material-subcategory loadings by component (near-diagonal check) ===")
+df = pd.DataFrame(ntf.ml, index=ntf.mat_subcats,
+                  columns=[f"C{k+1}" for k in range(ntf.K)])
+pd.set_option("display.width", 200, "display.max_columns", 20)
+print(df.round(3).to_string())
+
+c5 = 4
+print("\n=== C5 (livestock) cross-dimensional coupling ===")
+top_sec = np.argsort(ntf.sl[:, c5])[::-1][:5]
+print("  Top C5 sectors:", [(ntf.sectors[i][:35], round(ntf.sl[i, c5], 3)) for i in top_sec])
+top_mat = np.argsort(ntf.ml[:, c5])[::-1][:3]
+print("  Top C5 materials:", [(ntf.mat_subcats[i], round(ntf.ml[i, c5], 3)) for i in top_mat])
+top_cty = np.argsort(ntf.cl[:, c5])[::-1][:3]
+print("  Top C5 countries:", [(ntf.countries[i], round(ntf.cl[i, c5], 3)) for i in top_cty])
+c6 = 5
+top_cty6 = np.argsort(ntf.cl[:, c6])[::-1][:3]
+print("  Top C6 countries:", [(ntf.countries[i], round(ntf.cl[i, c6], 3)) for i in top_cty6])
+
+# --- Retained: uniformly-screened rank diagnostics (reviewer comment 3, round 1) ---
+diag = pd.read_parquet(S.DATA / "ntf_diagnostics.parquet")
+diag["marginal_R2_gain"] = diag["R2"].diff()
+print("\n=== Rank diagnostics (uniform 3 initialisations per K) ===")
+print(diag.round(3).to_string(index=False))
+
+print("\nDone. Figures 5-7 are generated by 07_regenerate_all_figures.py.")

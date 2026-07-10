@@ -212,186 +212,52 @@ plt.close()
 print(f"  Saved: fig08_projection_scenarios.png")
 
 # ---------------------------------------------------------------------------
-# 6. Fig 09: Material impact by bloc and MFA category
+# 6. Material impact in TONNES (round-2 revision)
 # ---------------------------------------------------------------------------
-print("\n[6/7] Computing material impact and plotting (Fig 09)...")
+# The agreement effect is a proportional change in *tonnes*, not in the
+# log-scale reconstruction index. Applying the shock to the log-scale loading
+# and reading the resulting index change as a tonnage change misstates the
+# effect by roughly an order of magnitude (reviewer comment 1, round 2). The
+# corrected computation lives in scenario.py: the shock scales each component's
+# contribution to extraction in tonnes, the perturbed tensor is back-transformed
+# before aggregation, and the reported effect is a genuine tonnage percentage.
+print("\n[6/7] Computing material impact in tonnes (scenario.py)...")
 
-# Convert projected loadings back to material tonnes
-# Tensor reconstruction: X_ijk_t = sum_k (country_i * sector_j * material_m * year_t)
-# Total change in material tonnes for a bloc = sum over countries, sectors, materials
+import scenario as S
 
-last_obs_year = YEAR_RANGE[1]
-last_proj_year = projection_years[-1]
+ntf = S.load_ntf()
+_, eff_load, _, _ = S.baseline_loadings(ntf)
+central = S.central_delta(ntf)
 
-
-def compute_material_tonnes(year_load_vector):
-    """Reconstruct total material tonnes by bloc from NTF loadings."""
-    results = {}
-    for bloc_name in ["MERCOSUR", "EU27"]:
-        mask = np.array([b == bloc_name for b in blocs])
-        total = 0
-        for k in range(K):
-            c_sum = country_loadings[mask, k].sum()
-            s_sum = sector_loadings[:, k].sum()
-            m_sum = material_loadings[:, k].sum()
-            y_val = year_load_vector[k]
-            total += c_sum * s_sum * m_sum * y_val
-        results[bloc_name] = total
-    return results
-
-# 2022 values (last observed year)
-hist_2022 = compute_material_tonnes(year_loadings[-1, :])
-
-# 2034 baseline and agreement (median)
-base_2034 = compute_material_tonnes(baseline_median[-1, :])
-agree_2034 = compute_material_tonnes(agreement_median[-1, :])
-
-# Decompose by MFA category and bloc at 2034
-impact_records = []
-for bloc_name in ["MERCOSUR", "EU27"]:
-    mask_c = np.array([b == bloc_name for b in blocs])
-    for mi, (subcat, mfa_cat) in enumerate(zip(mat_subcats, mfa_cats)):
-        for scenario_name, year_vec in [
-            (f"Baseline {last_proj_year}", baseline_median[-1, :]),
-            (f"Agreement {last_proj_year}", agreement_median[-1, :]),
-            (f"Observed {last_obs_year}", year_loadings[-1, :]),
-        ]:
-            total = 0
-            for k in range(K):
-                c_sum = country_loadings[mask_c, k].sum()
-                s_sum = sector_loadings[:, k].sum()
-                m_val = material_loadings[mi, k]
-                y_val = year_vec[k]
-                total += c_sum * s_sum * m_val * y_val
-            impact_records.append({
-                "bloc": bloc_name,
-                "mfa_category": mfa_cat,
-                "material_subcat": subcat,
-                "scenario": scenario_name,
-                "log_tonnes_index": total,
-            })
-
-impact_df = pd.DataFrame(impact_records)
-
-# Aggregate by bloc and MFA category
-agg = impact_df.groupby(["bloc", "mfa_category", "scenario"])["log_tonnes_index"].sum().reset_index()
-pivot = agg.pivot_table(index=["bloc", "mfa_category"], columns="scenario",
-                        values="log_tonnes_index").reset_index()
-
-# Compute percentage change
-pivot["change_baseline_%"] = ((pivot[f"Baseline {last_proj_year}"] - pivot[f"Observed {last_obs_year}"]) /
-                               pivot[f"Observed {last_obs_year}"] * 100)
-pivot["change_agreement_%"] = ((pivot[f"Agreement {last_proj_year}"] - pivot[f"Observed {last_obs_year}"]) /
-                                pivot[f"Observed {last_obs_year}"] * 100)
-pivot["agreement_effect_%"] = ((pivot[f"Agreement {last_proj_year}"] - pivot[f"Baseline {last_proj_year}"]) /
-                                pivot[f"Baseline {last_proj_year}"] * 100)
-
-print("\n=== Projected changes by bloc and MFA category ===")
-print(pivot[["bloc", "mfa_category", "change_baseline_%", "change_agreement_%",
-             "agreement_effect_%"]].to_string(index=False))
-
-# Plot — indexed extraction (Observed 2022 = 100), single panel, greyscale
-# Hatch distinguishes bloc; grey tone distinguishes scenario
-plt.rcParams.update({"hatch.linewidth": 0.8})
-
-fig, ax = plt.subplots(figsize=(10, 6))
-
-obs_col = f"Observed {last_obs_year}"
-bas_col = f"Baseline {last_proj_year}"
-agr_col = f"Agreement {last_proj_year}"
-
-# Build indexed values per bloc
-bar_data = []  # list of (label, values_array, fill, hatch)
-for bloc_name, hatch_pat in [("MERCOSUR", "///"), ("EU27", "xxx")]:
-    bp = pivot[pivot["bloc"] == bloc_name].set_index("mfa_category").reindex(MFA_ORDER)
-    obs_vals = bp[obs_col].values
-    idx_bas = bp[bas_col].values / obs_vals * 100
-    idx_agr = bp[agr_col].values / obs_vals * 100
-    bar_data.append((f"{bloc_name} Baseline ({last_proj_year})", idx_bas, "#CCCCCC", hatch_pat))
-    bar_data.append((f"{bloc_name} Agreement ({last_proj_year})", idx_agr, "#444444", hatch_pat))
-
-x = np.arange(len(MFA_ORDER))
-n_bars = len(bar_data)
-width = 0.18
-offsets = [(i - (n_bars - 1) / 2) * width for i in range(n_bars)]
-
-for (label, vals, fill, hatch), off in zip(bar_data, offsets):
-    bars = ax.bar(x + off, vals, width, color=fill, edgecolor="black",
-                  hatch=hatch, linewidth=1.0, label=label)
-    for bar in bars:
-        bar.set_edgecolor("black")
-        bar.set_linewidth(1.0)
-
-# Reference line at 100 (Observed 2022)
-ax.axhline(100, color="black", linestyle="--", linewidth=1.0,
-           label=f"Observed ({last_obs_year})")
-
-ax.set_xticks(x)
-ax.set_xticklabels(MFA_ORDER, fontsize=10, rotation=20, ha="right")
-ax.set_ylabel(f"Extraction index (Observed {last_obs_year} = 100)", fontsize=11)
-ax.grid(True, alpha=0.15, axis="y")
-ax.spines["top"].set_visible(False)
-ax.spines["right"].set_visible(False)
-ax.legend(frameon=True, facecolor="white", edgecolor="grey",
-          fontsize=9, loc="upper left")
-
-plt.suptitle(f"Projected material extraction {last_obs_year}\u2013{last_proj_year}:\n"
-             f"indexed to observed levels ({last_obs_year} = 100)",
-             fontsize=13, fontweight="bold")
-plt.tight_layout()
-plt.savefig(FIG_DIR / "fig09_material_impact.png", dpi=300, bbox_inches="tight")
-plt.close()
-print(f"  Saved: fig09_material_impact.png")
+cat_effect = S.tonnes_effect(ntf, eff_load, central)   # symmetric across blocs
+cat_df = pd.DataFrame(
+    [{"mfa_category": c, "agreement_effect_pct": round(cat_effect[c], 3)}
+     for c in S.MFA3]
+)
+cat_df.to_parquet(DATA_DIR / "projections.parquet", index=False)
+print("  Central-scenario MFA-category effect (tonnes, % vs baseline):")
+print(cat_df.to_string(index=False))
+print("  Saved: projections.parquet")
 
 # ---------------------------------------------------------------------------
-# 7. Sector-level impact estimates
+# 7. Sector-level impact in TONNES
 # ---------------------------------------------------------------------------
-print("\n[7/7] Computing sector-level impact...")
+print("\n[7/7] Computing sector-level impact in tonnes...")
 
-# For each sector, compute the agreement effect (difference in loading contribution)
-sector_impact = []
-for si, sec in enumerate(sector_names):
-    for bloc_name in ["MERCOSUR", "EU27"]:
-        mask_c = np.array([b == bloc_name for b in blocs])
-        base_total = 0
-        agree_total = 0
-        for k in range(K):
-            c_sum = country_loadings[mask_c, k].sum()
-            s_val = sector_loadings[si, k]
-            m_sum = material_loadings[:, k].sum()
-            base_total += c_sum * s_val * m_sum * baseline_median[-1, k]
-            agree_total += c_sum * s_val * m_sum * agreement_median[-1, k]
-
-        pct_change = ((agree_total - base_total) / base_total * 100) if base_total > 0 else 0
-        sector_impact.append({
-            "sector": sec,
-            "bloc": bloc_name,
-            "baseline_index": base_total,
-            "agreement_index": agree_total,
-            "agreement_effect_%": pct_change,
-        })
-
-sector_df = pd.DataFrame(sector_impact)
+sector_effect = S.sector_effects(ntf, central)         # loading-weighted, tonnes
+sector_df = pd.DataFrame({
+    "sector_idx": range(len(ntf.sectors)),
+    "sector_name": ntf.sectors,
+    "agreement_effect_pct": np.round(sector_effect, 3),
+})
 sector_df.to_parquet(DATA_DIR / "projections_by_sector.parquet", index=False)
-print(f"  Saved: projections_by_sector.parquet")
+print("  Saved: projections_by_sector.parquet")
 
-# ---------------------------------------------------------------------------
-# Summary statistics
-# ---------------------------------------------------------------------------
-print(f"\n{'='*60}")
-print("PROJECTION SUMMARY")
-print(f"{'='*60}")
+top = sector_df.nlargest(5, "agreement_effect_pct")
+print("\n  Top 5 sectors by agreement effect (tonnes %):")
+for _, r in top.iterrows():
+    print(f"    +{r['agreement_effect_pct']:.1f}%  {r['sector_name'][:50]}")
 
-for bloc_name in ["MERCOSUR", "EU27"]:
-    print(f"\n{bloc_name}:")
-    bloc_sec = sector_df[sector_df["bloc"] == bloc_name]
-    top_inc = bloc_sec.nlargest(5, "agreement_effect_%")
-    print(f"  Top 5 sectors with INCREASED material extraction:")
-    for _, row in top_inc.iterrows():
-        print(f"    +{row['agreement_effect_%']:.1f}%  {row['sector'][:50]}")
-
-# Save full projections
-impact_df.to_parquet(DATA_DIR / "projections.parquet", index=False)
-print(f"\n  Projections saved to {DATA_DIR / 'projections.parquet'}")
-
+print("\nNote: the publication scenario figures (Fig. 5-7) are produced by")
+print("07_regenerate_all_figures.py; fig08 here is an intermediate draft.")
 print("\nDone.")

@@ -23,11 +23,12 @@ projecting/
 │   └── ne_110m_admin_0_countries.zip   # Natural Earth shapefile for choropleth maps
 ├── scripts/                 # Analysis scripts (Python)
 │   ├── config.py                       # Shared configuration (paths, constants, parameters)
+│   ├── scenario.py                     # Scenario engine: tonnes-proportional shock, robustness, specialisation
 │   ├── 01_build_tensor.py              # Extract MERCOSUR-4 + EU-27 from GLORIA TQ
 │   ├── 02_ntf_analysis.py              # Non-negative tensor factorisation (rank selection + K=6)
 │   ├── 03_geospatial_viz.py            # Choropleth maps, temporal trends, heatmaps
-│   ├── 04_scenario_projection.py       # Baseline/agreement scenario paths + trend bootstrap
-│   ├── 05_sensitivity_analysis.py      # Shock-magnitude/phase-in sensitivity envelope (Fig 7)
+│   ├── 04_scenario_projection.py       # Baseline/agreement loading paths + tonnes impact
+│   ├── 05_sensitivity_analysis.py      # Independent-shock robustness + specialisation (tables)
 │   ├── 07_regenerate_all_figures.py    # Publication figures 2-7 + S1-S4 (600 dpi, no in-figure titles)
 │   └── 08_regenerate_pipeline.py       # Pipeline schematic (Fig 1, 600 dpi)
 ├── figures/                 # All figures (article + supplementary)
@@ -62,11 +63,11 @@ Generates choropleth maps of country loadings, temporal evolution by bloc, mater
 
 ### 4. Scenario Paths (04_scenario_projection.py)
 
-Constructs baseline (no-agreement) and agreement paths for the temporal loadings (2022-2034) using quadratic trend extrapolation with illustrative, tariff-schedule-informed shocks (December 2024 factsheets). The shocks are scenario assumptions set by the analyst, not estimated trade-policy responses; the magnitude of any effect is by construction proportional to the assumed shock. Augmented Dickey-Fuller tests confirm trend-stationarity of all six temporal loading series (p < 0.05 for five components; p = 0.079 for C6 under constant+trend, p = 0.017 under constant-only). A residual bootstrap (N=1000, 90%) characterises dispersion around the fitted historical trend only — not the agreement-effect uncertainty. Agreement assumed to enter into force in 2027 with a 5-year linear phase-in.
+Constructs baseline (no-agreement) and agreement paths for the temporal loadings (2022-2034) using quadratic trend extrapolation with illustrative, tariff-schedule-informed shocks (December 2024 factsheets). The shocks are scenario assumptions set by the analyst, not estimated trade-policy responses; the magnitude of any effect is by construction proportional to the assumed shock. The material impact is computed in **tonnes** (via `scenario.py`): the shock scales each component's contribution to extraction, and the perturbed tensor is back-transformed from the log(1 + x) space before aggregation, so the reported effects are genuine tonnage percentages rather than changes in a log-scale index. Augmented Dickey-Fuller tests confirm trend-stationarity of all six temporal loading series (p < 0.05 for five components; p = 0.079 for C6 under constant+trend, p = 0.017 under constant-only). A residual bootstrap (N=1000, 90%) characterises dispersion around the fitted historical trend only — not the agreement-effect uncertainty. Agreement assumed to enter into force in 2027 with a 5-year linear phase-in.
 
 ### 5. Sensitivity Analysis (05_sensitivity_analysis.py)
 
-Sweeps the full shock vector over scale factors 0.5-1.5 and the phase-in window over 3-10 years (20 combinations) to map the sensitivity envelope of the MFA-category effect (Fig 7). The ordering biomass > metal ores > non-metallic minerals is preserved in all 20 combinations, whereas the magnitudes scale with the assumed shock; an equal-shock alternative confirms that the cross-category differentiation is induced by the assumed concession ordering. Runs from the intermediate data alone (the full GLORIA tensor is not needed).
+Tests the robustness of the ordering by varying the component shocks **independently** (via `scenario.py`), rather than rescaling the whole vector by a common factor. Across 2,000 draws that perturb each shock independently by up to ±60% of its tariff-anchored value, the ordering biomass > metal ores > non-metallic minerals holds in 84% of cases; across 2,000 draws that ignore the tariff schedule, it holds in only 15% — so the ordering follows from the assumed concession ranking, not from the decomposition. The script also reports a specialisation measure (within-bloc and between-bloc extraction shares) baseline versus scenario (Fig 7; Table S9 of the article). Runs from the intermediate data alone (the full GLORIA tensor is not needed).
 
 ## Reproduction Instructions
 
@@ -134,8 +135,8 @@ All publication figures are produced as RGB PNGs at 600 dpi with sans-serif lett
 | Fig. 3 | `fig03_material_heatmap.png` | Material subcategory loadings on NTF components |
 | Fig. 4 | `fig04_choropleth_loadings.png` | Choropleth maps of country loadings (6 components) |
 | Fig. 5 | `fig05_projection_scenarios.png` | Scenario paths: baseline vs agreement (trend-only 90% bootstrap bands) |
-| Fig. 6 | `fig06_material_impact.png` | Central-scenario change by MFA category |
-| Fig. 7 | `fig07_sensitivity.png` | Sensitivity envelope of the MFA-category effect to assumed shocks |
+| Fig. 6 | `fig06_material_impact.png` | Central-scenario change by MFA category and bloc (tonnes) |
+| Fig. 7 | `fig07_sensitivity.png` | Ordinal robustness under independent variation of the component shocks |
 | Fig. S1 | `fig_s1_component_loadings.png` | Full component loadings (all dimensions) |
 | Fig. S2 | `fig_s2_sector_comparison.png` | Sector loadings weighted by bloc |
 | Fig. S3 | `fig_s3_rank_selection.png` | NTF rank selection: R-squared and marginal gain |
@@ -147,7 +148,7 @@ All publication figures are produced as RGB PNGs at 600 dpi with sans-serif lett
 
 2. **Six latent components:** NTF identifies agricultural crops, forestry, fishery, non-metallic minerals, livestock and grazing, and metal ores as distinct extraction patterns (K=6, R-squared=0.75).
 
-3. **Scenario sensitivity:** Under the central illustrative scenario, the largest sector effects fall on cattle raising (+10.8%) and cereal cultivation (+9.7%), with biomass strongest at the MFA-category level (+8.5%). These magnitudes are conditional on the assumed shocks; across all 20 sensitivity combinations the robust feature is the ordering biomass (+3.0% to +12.7%) > metal ores (+2.1% to +8.8%) > non-metallic minerals (+0.7% to +3.0%), not the point values.
+3. **Scenario sensitivity:** Under the central illustrative scenario, in tonnage terms, the largest sector effects fall on cattle raising (+10.8%) and cereal cultivation (+9.6%), with biomass strongest at the MFA-category level (+9.2%), followed by metal ores (+5.8%) and non-metallic minerals (+2.0%). These magnitudes are conditional on the assumed shocks. When the component shocks are varied independently, the ordering biomass > metal ores > non-metallic minerals holds in 84% of tariff-anchored draws but in only 15% of draws that ignore the tariff schedule — so the ordering reflects the assumed concession ranking, not the decomposition. Within this stylised setting the biomass share of MERCOSUR's own extraction rises modestly, from 62.2% to 63.6%, while the between-bloc split of each category is fixed by construction.
 
 ## Reproducibility
 

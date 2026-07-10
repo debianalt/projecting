@@ -62,29 +62,29 @@ Rank selection diagnostics for K = 2 to 10.
 
 ## projections.parquet
 
-Scenario projections of material extraction changes (2022-2034) by bloc and MFA category.
+Central-scenario agreement effect by MFA category, at 2034, in tonnage terms
+(percentage difference between the agreement and baseline paths). Computed by
+`04_scenario_projection.py` via `scenario.py`: the shock is applied to
+extraction in tonnes and the perturbed tensor is back-transformed from the
+log(1 + x) space before aggregation, so the effect is a genuine tonnage change
+(not a change in a log-scale index). Effects are symmetric across blocs under
+the central calibration.
 
 | Variable | Description | Unit |
 |----------|-------------|------|
-| bloc | Economic bloc | - |
-| mfa_category | MFA category | - |
-| scenario | Scenario (baseline, agreement) | - |
-| year | Projected year | YYYY |
-| value | Projected extraction | kilotonnes |
-| ci_lower | 90% bootstrap CI lower bound | kilotonnes |
-| ci_upper | 90% bootstrap CI upper bound | kilotonnes |
+| mfa_category | MFA category (Biomass, Metal ores, Non-metallic minerals) | - |
+| agreement_effect_pct | Agreement vs baseline effect at 2034 | percent |
 
 ## projections_by_sector.parquet
 
-Sector-level estimates of the agreement effect on material extraction.
+Sector-level agreement effect on material extraction, in tonnage terms, computed
+as the component-loading-weighted mean of the per-component shocks (`scenario.py`).
 
 | Variable | Description | Unit |
 |----------|-------------|------|
-| sector_idx | GLORIA sector index | - |
+| sector_idx | GLORIA sector index (0-based) | - |
 | sector_name | Sector label | - |
-| bloc | Economic bloc | - |
-| agreement_effect | Estimated change relative to baseline | proportion |
-| effect_kt | Estimated change in absolute terms | kilotonnes |
+| agreement_effect_pct | Agreement vs baseline effect at 2034 | percent |
 
 ## ne_110m_admin_0_countries.zip
 
