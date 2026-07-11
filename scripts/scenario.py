@@ -18,7 +18,7 @@ component contributing to a cell has its tonnes scaled by (1 + delta_k), which
 in log space is an additive shift of log(1 + delta_k) weighted by the
 component's share of the cell's reconstruction. Effects are then computed in
 tonnes space after back-transformation with expm1. This makes the reported
-percentages genuine tonnage percentages (biomass +9.2%, metal ores +5.9%,
+percentages genuine tonnage percentages (biomass +9.2%, metal ores +5.8%,
 non-metallic minerals +2.0%).
 
 Functions
